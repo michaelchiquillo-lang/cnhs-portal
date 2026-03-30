@@ -1,114 +1,237 @@
-* { box-sizing: border-box; }
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f1f5f9;
-  color: #0f172a;
+const SUPABASE_URL = "PASTE_YOUR_SUPABASE_URL_HERE";
+const SUPABASE_ANON_KEY = "PASTE_YOUR_PUBLISHABLE_KEY_HERE";
+
+const { createClient } = supabase;
+const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const loginScreen = document.getElementById("loginScreen");
+const dashboardScreen = document.getElementById("dashboardScreen");
+const loginBtn = document.getElementById("loginBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+const loginMessage = document.getElementById("loginMessage");
+const requestMessage = document.getElementById("requestMessage");
+const childSelector = document.getElementById("childSelector");
+const childSelectorWrap = document.getElementById("childSelectorWrap");
+
+let currentProfile = null;
+let currentStudent = null;
+let linkedStudents = [];
+
+function officeForRequest(type) {
+  if (type === "Good Moral" || type === "Certificate of Enrollment") return "Guidance";
+  if (type === "SF10" || type === "Report Card Copy" || type === "Certification of Grades") return "Records";
+  return "Guidance";
 }
-.hidden { display: none !important; }
-.screen { min-height: 100vh; }
-.login-card, .card {
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+
+function showLogin() {
+  loginScreen.classList.remove("hidden");
+  dashboardScreen.classList.add("hidden");
 }
-#loginScreen {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
+
+function showDashboard() {
+  loginScreen.classList.add("hidden");
+  dashboardScreen.classList.remove("hidden");
 }
-.login-card {
-  width: 100%;
-  max-width: 420px;
-  padding: 24px;
+
+async function loadProfile(userId) {
+  const { data, error } = await client
+    .from("profiles")
+    .select("*")
+    .eq("id", userId)
+    .single();
+
+  if (error) throw error;
+  currentProfile = data;
 }
-h1, h2, h3 { margin: 0 0 12px; }
-label {
-  display: block;
-  margin: 12px 0 6px;
-  font-size: 14px;
-  font-weight: 600;
+
+async function loadStudentForStudentUser(userId) {
+  const { data, error } = await client
+    .from("students")
+    .select("*")
+    .eq("profile_id", userId)
+    .single();
+
+  if (error) throw error;
+  currentStudent = data;
+  linkedStudents = [data];
+  childSelectorWrap.classList.add("hidden");
 }
-input, select, button {
-  width: 100%;
-  padding: 12px;
-  border-radius: 10px;
-  border: 1px solid #cbd5e1;
-  font-size: 14px;
+
+async function loadStudentsForParentUser(userId) {
+  const { data, error } = await client
+    .from("parent_student_links")
+    .select("student_id, relationship, students(*)")
+    .eq("parent_profile_id", userId);
+
+  if (error) throw error;
+
+  linkedStudents = data.map(row => row.students).filter(Boolean);
+  currentStudent = linkedStudents[0] || null;
+
+  childSelector.innerHTML = linkedStudents
+    .map(s => `<option value="${s.id}">${s.full_name} — ${s.grade_level} ${s.section}</option>`)
+    .join("");
+
+  childSelectorWrap.classList.toggle("hidden", linkedStudents.length === 0);
 }
-button {
-  margin-top: 12px;
-  background: #1e3a8a;
-  color: white;
-  border: none;
-  cursor: pointer;
-}
-button.secondary {
-  width: auto;
-  background: #e2e8f0;
-  color: #0f172a;
-}
-.muted { color: #475569; }
-.message { margin-top: 12px; font-size: 14px; }
-.helper {
-  margin-top: 18px;
-  padding: 12px;
-  background: #eff6ff;
-  border-radius: 10px;
-  font-size: 13px;
-}
-.topbar {
-  background: #0f172a;
-  color: white;
-  padding: 16px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.container {
-  max-width: 980px;
-  margin: 0 auto;
-  padding: 20px;
-}
-.card {
-  padding: 18px;
-  margin-bottom: 18px;
-}
-.row.between {
-  display: flex;
-  gap: 16px;
-  justify-content: space-between;
-  align-items: end;
-  flex-wrap: wrap;
-}
-.grade-row, .request-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 12px 0;
-  border-bottom: 1px solid #e2e8f0;
-}
-.grade-row:last-child, .request-row:last-child { border-bottom: none; }
-.badge {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 700;
-  background: #e2e8f0;
-}
-.request-form {
-  display: grid;
-  gap: 10px;
-  margin-bottom: 14px;
-}
-@media (min-width: 700px) {
-  .request-form {
-    grid-template-columns: 1.2fr 1.5fr auto;
+
+async function loadGrades(studentId) {
+  const gradesList = document.getElementById("gradesList");
+  gradesList.innerHTML = "Loading...";
+
+  const { data, error } = await client
+    .from("quarter_grades")
+    .select("*")
+    .eq("student_id", studentId)
+    .eq("quarter_no", 2)
+    .order("subject_name", { ascending: true });
+
+  if (error) {
+    gradesList.innerHTML = `<p class="message">${error.message}</p>`;
+    return;
   }
-  .request-form button {
-    width: auto;
-    margin-top: 0;
+
+  if (!data.length) {
+    gradesList.innerHTML = "<p class='message'>No grades found yet.</p>";
+    return;
   }
+
+  gradesList.innerHTML = data
+    .map(g => `
+      <div class="grade-row">
+        <div>
+          <strong>${g.subject_name}</strong><br>
+          <span class="muted">${g.teacher_name || ""}</span>
+        </div>
+        <div><span class="badge">${g.grade}</span></div>
+      </div>
+    `)
+    .join("");
 }
+
+async function loadRequests(userId) {
+  const requestsList = document.getElementById("requestsList");
+  requestsList.innerHTML = "Loading...";
+
+  const { data, error } = await client
+    .from("document_requests")
+    .select("*")
+    .eq("requester_profile_id", userId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    requestsList.innerHTML = `<p class="message">${error.message}</p>`;
+    return;
+  }
+
+  if (!data.length) {
+    requestsList.innerHTML = "<p class='message'>No requests yet.</p>";
+    return;
+  }
+
+  requestsList.innerHTML = data
+    .map(r => `
+      <div class="request-row">
+        <div>
+          <strong>${r.request_type}</strong><br>
+          <span class="muted">${r.request_number} • ${r.office}</span>
+        </div>
+        <div><span class="badge">${r.status}</span></div>
+      </div>
+    `)
+    .join("");
+}
+
+async function renderDashboard(user) {
+  await loadProfile(user.id);
+
+  document.getElementById("welcomeText").textContent = currentProfile.full_name || user.email;
+  document.getElementById("roleText").textContent = `Role: ${currentProfile.role}`;
+
+  if (currentProfile.role === "parent") {
+    await loadStudentsForParentUser(user.id);
+  } else {
+    await loadStudentForStudentUser(user.id);
+  }
+
+  if (!currentStudent) {
+    document.getElementById("gradesList").innerHTML = "<p class='message'>No linked student record found yet.</p>";
+    document.getElementById("requestsList").innerHTML = "<p class='message'>No requests yet.</p>";
+    return;
+  }
+
+  await loadGrades(currentStudent.id);
+  await loadRequests(user.id);
+}
+
+loginBtn.addEventListener("click", async () => {
+  loginMessage.textContent = "";
+
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+
+  const { data, error } = await client.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    loginMessage.textContent = error.message;
+    return;
+  }
+
+  showDashboard();
+  await renderDashboard(data.user);
+});
+
+logoutBtn.addEventListener("click", async () => {
+  await client.auth.signOut();
+  showLogin();
+});
+
+childSelector.addEventListener("change", async (e) => {
+  currentStudent = linkedStudents.find(s => s.id === e.target.value) || null;
+  if (currentStudent) {
+    await loadGrades(currentStudent.id);
+  }
+});
+
+document.getElementById("requestBtn").addEventListener("click", async () => {
+  requestMessage.textContent = "";
+
+  if (!currentProfile || !currentStudent) {
+    requestMessage.textContent = "No student selected.";
+    return;
+  }
+
+  const requestType = document.getElementById("requestType").value;
+  const purpose = document.getElementById("requestPurpose").value.trim();
+
+  const payload = {
+    request_number: `REQ-${Date.now()}`,
+    requester_profile_id: currentProfile.id,
+    student_id: currentStudent.id,
+    request_type: requestType,
+    office: officeForRequest(requestType),
+    status: "Submitted",
+    purpose
+  };
+
+  const { error } = await client.from("document_requests").insert(payload);
+
+  if (error) {
+    requestMessage.textContent = error.message;
+    return;
+  }
+
+  requestMessage.textContent = "Request submitted.";
+  document.getElementById("requestPurpose").value = "";
+  await loadRequests(currentProfile.id);
+});
+
+(async function init() {
+  const { data } = await client.auth.getSession();
+  if (data.session?.user) {
+    showDashboard();
+    await renderDashboard(data.session.user);
+  } else {
+    showLogin();
+  }
+})();
