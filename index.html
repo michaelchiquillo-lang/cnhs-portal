@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CNHS Portal Prototype</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-logo">C</div>
+        <div>
+          <div class="brand-title">CNHS Portal</div>
+          <div class="brand-sub">Unified School Portal</div>
+        </div>
+      </div>
+
+      <div class="section-label">Portal Views</div>
+      <nav class="nav-list">
+        <button class="nav-btn active" data-view="login">Login</button>
+        <button class="nav-btn" data-view="student">Student</button>
+        <button class="nav-btn" data-view="parent">Parent</button>
+        <button class="nav-btn" data-view="teacher">Teacher</button>
+        <button class="nav-btn" data-view="adviser">Adviser</button>
+        <button class="nav-btn" data-view="requests">Requests</button>
+        <button class="nav-btn" data-view="admin">Admin</button>
+      </nav>
+
+      <div class="section-label">Quick Tools</div>
+      <div class="tool-stack">
+        <button class="ghost-btn" id="resetDataBtn">Reset Sample Data</button>
+        <button class="ghost-btn" id="mobileToggleBtn">Toggle Menu</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <div class="eyebrow">School Year 2026–2027</div>
+          <h1 id="pageTitle">Login</h1>
+        </div>
+        <div class="top-actions">
+          <input type="text" class="search" placeholder="Search prototype..." />
+          <div class="avatar">CN</div>
+        </div>
+      </header>
+
+      <section id="view-login" class="view active">
+        <div class="hero">
+          <div>
+            <div class="eyebrow light">CNHS UNIFIED PORTAL</div>
+            <h2>One portal for students, parents, teachers, advisers, offices, and admin.</h2>
+            <p>This is a self-contained prototype you can open directly in your browser. No installation needed.</p>
+          </div>
+          <div class="hero-stats">
+            <div class="stat-card dark"><span>Students</span><strong>1,248</strong></div>
+            <div class="stat-card dark"><span>Requests</span><strong>63</strong></div>
+            <div class="stat-card dark"><span>Completion</span><strong>87%</strong></div>
+          </div>
+        </div>
+
+        <div class="grid two">
+          <div class="card">
+            <h3>Student First Login</h3>
+            <div class="form-grid">
+              <input id="studentIdInput" placeholder="School ID or LRN" />
+              <input id="studentBirthdateInput" type="date" />
+              <button class="primary-btn" id="studentLoginBtn">Open Student View</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Staff / Parent Quick Access</h3>
+            <div class="chips">
+              <button class="chip" data-open-view="parent">Parent</button>
+              <button class="chip" data-open-view="teacher">Teacher</button>
+              <button class="chip" data-open-view="adviser">Adviser</button>
+              <button class="chip" data-open-view="requests">Requests</button>
+              <button class="chip" data-open-view="admin">Admin</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-student" class="view">
+        <div class="summary-banner">
+          <div>
+            <div class="eyebrow">STUDENT VIEW</div>
+            <h2 id="studentNameHeading">Juan Dela Cruz</h2>
+            <p id="studentSectionHeading">Grade 7 - Rizal</p>
+          </div>
+          <div class="metric-grid three">
+            <div class="metric"><span>Average</span><strong id="studentAverage">89.5</strong></div>
+            <div class="metric"><span>Rank</span><strong>5</strong></div>
+            <div class="metric"><span>Honors</span><strong>With Honors</strong></div>
+          </div>
+        </div>
+
+        <div class="grid two">
+          <div class="card">
+            <div class="card-head">
+              <h3>Quarter 2 Grades</h3>
+              <span class="badge neutral">Simple view only</span>
+            </div>
+            <div id="studentGradesList" class="list-stack"></div>
+          </div>
+
+          <div class="stack">
+            <div class="card">
+              <h3>Attendance</h3>
+              <div class="metric-grid three compact">
+                <div class="metric light"><span>Present</span><strong>45</strong></div>
+                <div class="metric light"><span>Absent</span><strong>2</strong></div>
+                <div class="metric light"><span>Late</span><strong>1</strong></div>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3>Actions</h3>
+              <div class="button-stack">
+                <button class="primary-btn" data-open-view="requests">Request Document</button>
+                <button class="secondary-btn" data-open-view="requests">Track Requests</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-parent" class="view">
+        <div class="summary-banner alt">
+          <div>
+            <div class="eyebrow">PARENT VIEW</div>
+            <h2>Maria Dela Cruz</h2>
+            <p>One account for multiple children</p>
+          </div>
+          <div class="select-wrap">
+            <label for="childSelect">Selected Child</label>
+            <select id="childSelect"></select>
+          </div>
+        </div>
+
+        <div class="grid two">
+          <div class="card">
+            <h3>Current Quarter Grades</h3>
+            <div id="parentGradesList" class="list-stack"></div>
+          </div>
+          <div class="stack">
+            <div class="card">
+              <h3>Request History</h3>
+              <div id="parentRequestList" class="list-stack"></div>
+            </div>
+            <div class="card">
+              <h3>Actions</h3>
+              <div class="button-stack">
+                <button class="primary-btn" data-open-view="requests">New Request</button>
+                <button class="secondary-btn" data-open-view="student">View Child Summary</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-teacher" class="view">
+        <div class="summary-banner">
+          <div>
+            <div class="eyebrow">TEACHER VIEW</div>
+            <h2>My Classes</h2>
+            <p>Upload grades, edit drafts, and submit for review.</p>
+          </div>
+          <div class="metric-grid three compact">
+            <div class="metric"><span>Assigned</span><strong>3</strong></div>
+            <div class="metric"><span>Drafts</span><strong>1</strong></div>
+            <div class="metric"><span>Returned</span><strong>1</strong></div>
+          </div>
+        </div>
+
+        <div class="grid two-wide">
+          <div class="card">
+            <div class="card-head">
+              <h3>Class Batches</h3>
+              <button class="primary-btn small">Upload Grades</button>
+            </div>
+            <div id="teacherClassesList" class="list-stack"></div>
+          </div>
+          <div class="stack">
+            <div class="card">
+              <h3>Import Preview</h3>
+              <div class="notice success">42 rows valid and ready to save as draft.</div>
+              <div class="notice danger">3 rows need review: quarter mismatch, unknown student, duplicate grade.</div>
+            </div>
+            <div class="card">
+              <h3>Workflow</h3>
+              <ol class="steps">
+                <li>Download standard template</li>
+                <li>Upload multi-class file</li>
+                <li>Fix validation issues</li>
+                <li>Submit for adviser review</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-adviser" class="view">
+        <div class="metric-grid four">
+          <div class="metric light"><span>Students</span><strong>45</strong></div>
+          <div class="metric light"><span>Submitted Subjects</span><strong>5 / 7</strong></div>
+          <div class="metric light"><span>Attendance Alerts</span><strong>3</strong></div>
+          <div class="metric light"><span>Pending Reviews</span><strong>2</strong></div>
+        </div>
+
+        <div class="grid two">
+          <div class="card">
+            <h3>Class Oversight</h3>
+            <div class="mini-grid">
+              <div class="mini-card"><strong>Attendance</strong><span>Daily with tardy/late</span></div>
+              <div class="mini-card"><strong>Core Values</strong><span>Adviser-only encoding</span></div>
+              <div class="mini-card"><strong>Rankings</strong><span>Per section per quarter</span></div>
+              <div class="mini-card"><strong>Approvals</strong><span>Approve or return batches</span></div>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Pending Review Queue</h3>
+            <div id="adviserQueueList" class="list-stack"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-requests" class="view">
+        <div class="metric-grid three compact">
+          <div class="metric light"><span>Submitted</span><strong id="requestSubmittedCount">0</strong></div>
+          <div class="metric light"><span>Processing</span><strong id="requestProcessingCount">0</strong></div>
+          <div class="metric light"><span>Ready / Released</span><strong id="requestReleasedCount">0</strong></div>
+        </div>
+
+        <div class="grid two">
+          <div class="card">
+            <h3>Create Request</h3>
+            <div class="form-grid">
+              <select id="requestTypeInput"></select>
+              <select id="requestChildInput"></select>
+              <input id="requestPurposeInput" placeholder="Purpose" />
+              <textarea id="requestNotesInput" placeholder="Notes"></textarea>
+              <button class="primary-btn" id="createRequestBtn">Submit Request</button>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Status Timeline</h3>
+            <ol class="steps">
+              <li>Submitted</li>
+              <li>Under Verification</li>
+              <li>Processing</li>
+              <li>Ready for Release</li>
+              <li>Released</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="card top-gap">
+          <div class="card-head">
+            <h3>Office Request Queue</h3>
+            <span class="badge neutral">Guidance, Records, Inventory, Cashier</span>
+          </div>
+          <div id="requestsList" class="list-stack"></div>
+        </div>
+      </section>
+
+      <section id="view-admin" class="view">
+        <div class="summary-banner admin">
+          <div>
+            <div class="eyebrow">ADMIN VIEW</div>
+            <h2>System Setup</h2>
+            <p>Control roles, school years, grading rules, and request types.</p>
+          </div>
+        </div>
+
+        <div class="grid two">
+          <div class="card">
+            <h3>Grading Rules</h3>
+            <div class="form-grid">
+              <label>Number of Quarters <input id="adminQuartersInput" type="number" min="1" max="4" /></label>
+              <label>Passing Grade <input id="adminPassingInput" type="number" step="0.01" /></label>
+              <label>Allow Decimals
+                <select id="adminDecimalsInput">
+                  <option value="true">Yes</option>
+                  <option value="false">No</option>
+                </select>
+              </label>
+              <button class="primary-btn" id="saveRulesBtn">Save Rules</button>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Request Types</h3>
+            <div id="requestTypeList" class="list-stack small-list"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
